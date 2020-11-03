@@ -6,6 +6,9 @@ const appInsights = require('applicationinsights');
 appInsights.setup().start();
 appInsights.defaultClient.config.samplingPercentage = 100; // 33% of all telemetry will be sent to Application Insights
 appInsights.start();
+
+context.log('I was here **********');
+
 function traverse(an_array) {
 
     var rval = "";
