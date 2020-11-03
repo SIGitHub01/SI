@@ -3,8 +3,9 @@ var htmlparser = require("htmlparser2");
 const { BlobServiceClient } = require('@azure/storage-blob');
 const { v1: uuid} = require('uuid');
 const appInsights = require('applicationinsights');
-appInsights.setup('<instrumentation_key>').start();
-
+appInsights.setup().start();
+appInsights.defaultClient.config.samplingPercentage = 100; // 33% of all telemetry will be sent to Application Insights
+appInsights.start();
 function traverse(an_array) {
 
     var rval = "";
