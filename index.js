@@ -2,6 +2,8 @@ var fs = require('fs');
 var htmlparser = require("htmlparser2");
 const { BlobServiceClient } = require('@azure/storage-blob');
 const { v1: uuid} = require('uuid');
+const appInsights = require('applicationinsights');
+appInsights.setup('<instrumentation_key>').start();
 
 function traverse(an_array) {
 
@@ -86,20 +88,34 @@ const MAIL_OUTBOUND_BLOB_NAME = process.env.MAIL_OUTBOUND_BLOB_NAME;
 
 async function main() {
 
+    console.log('start');
+
     const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
 
     // get the data
+    console.log('start getContainerClient ' + MAIL_CONTAINER_NAME);
     const containerClient = blobServiceClient.getContainerClient(MAIL_CONTAINER_NAME);
+    console.log('stop getContainerClient ' + MAIL_CONTAINER_NAME);
+
+    console.log('start getBlockBlobClient ' + MAIL_INBOUND_BLOB_NAME);
     const inboundBlockBlobClient = containerClient.getBlockBlobClient(MAIL_INBOUND_BLOB_NAME);
     const downloadBlockBlobResponse = await inboundBlockBlobClient.download(0);
+    console.log('start getBlockBlobClient ' + MAIL_INBOUND_BLOB_NAME);
+
+    console.log('start streamToString ');
     var inbound_data_body = await streamToString(downloadBlockBlobResponse.readableStreamBody)
+    console.log('finish streamToString ');
 
     // parse the data
+    console.log('start parse ');
     var outbound_data_body = parse_mail_for_partners(inbound_data_body);
+    console.log('stop parse ');
 
     // write the data
+    console.log('start write ' + MAIL_OUTBOUND_BLOB_NAME);
     const outboundBlockBlobClient = containerClient.getBlockBlobClient(MAIL_OUTBOUND_BLOB_NAME);
     const uploadBlobResponse = await outboundBlockBlobClient.upload(outbound_data_body, outbound_data_body.length);
+    console.log('stop write ' + MAIL_OUTBOUND_BLOB_NAME);
 
 }
 
